@@ -1,0 +1,19 @@
+---
+# tasks file for vsftpd
+- name: Install aptitude using apt
+  apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+- name: Update and install vsftpd
+  apt: update_cache=yes name=vsftpd state=latest
+- name: Modify FTP configuation
+  lineinfile:
+    dest: /etc/vsftpd.conf
+    backup: yes
+    backrefs: yes
+    state: present
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { regexp: anonymous_enable=NO, line: anonymous_enable=YES }
+    - { regexp: \#anon_upload_enable, line: anon_upload_enable=YES }
+    - { regexp: \#write_enable, line: write_enable=YES }
+  notify: reload vsftpd
